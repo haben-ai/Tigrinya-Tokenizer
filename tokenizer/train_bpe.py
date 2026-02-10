@@ -15,7 +15,7 @@ def load_config(path="configs/bpe_50k.yaml"):
 
 def train():
     """Train readable Ge’ez BPE tokenizer on TLMD dataset"""
-
+    
     cfg = load_config()
     corpus_file = "data/processed/normalized.txt"
 
@@ -57,7 +57,7 @@ def train():
     print(f"[INFO] Tokenizer saved to: {out_file}")
 
     # Quick test
-    test_text = "ኣብዚ ቦታ ምንባር ሰናይ ኢዩ።"
+    test_text = "ኣብዚ ቦታ ምንባር ንዓና ሰናይ ኢዩ።"
     tokens = tokenizer.encode(test_text).tokens
     print(f"[INFO] Sample encoding for '{test_text}': {tokens}")
     decoded = tokenizer.decode(tokenizer.encode(test_text).ids)
