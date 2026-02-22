@@ -5,24 +5,23 @@ from tokenizers.models import BPE
 from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import Split
 from tokenizers.normalizers import Sequence, NFC
-from tqdm import tqdm
+from tokenizers.decoders import BPEDecoder
 import yaml
 
+
 def load_config(path="configs/bpe_50k.yaml"):
-    """Load tokenizer config from YAML"""
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
+
 def train():
-    """Train readable Ge’ez BPE tokenizer on TLMD dataset"""
-    
     cfg = load_config()
     corpus_file = "data/processed/normalized.txt"
 
-    # Check corpus
     if not os.path.exists(corpus_file):
         print(f"[ERROR] Corpus file not found: {corpus_file}")
         return
+
     if os.path.getsize(corpus_file) == 0:
         print(f"[ERROR] Corpus file is empty: {corpus_file}")
         return
@@ -32,36 +31,47 @@ def train():
 
     # Initialize tokenizer
     tokenizer = Tokenizer(BPE(unk_token="<unk>"))
+
+    # Normalize Unicode (important for Ge’ez)
     tokenizer.normalizer = Sequence([NFC()])
 
-    # Character-level pre-tokenizer (splits every character)
+    # Character-level splitting
     tokenizer.pre_tokenizer = Split(pattern=r"", behavior="isolated")
 
-    # Setup trainer
+    # Proper BPE decoder (joins tokens correctly)
+    tokenizer.decoder = BPEDecoder()
+
+    # Trainer
     trainer = BpeTrainer(
         vocab_size=cfg["tokenizer"]["vocab_size"],
         min_frequency=cfg["tokenizer"]["min_frequency"],
         special_tokens=cfg["special_tokens"]
     )
 
-    # Add tqdm for visible progress
     print("[INFO] Starting training...")
     tokenizer.train(files=[corpus_file], trainer=trainer)
     print("[INFO] Training complete!")
 
-    # Save tokenizer (Hugging Face compatible)
+    # Save tokenizer
     out_dir = Path("outputs/tokenizer")
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_file = out_dir / "tokenizer.json"
-    tokenizer.save(str(out_file))
-    print(f"[INFO] Tokenizer saved to: {out_file}")
+    tokenizer.save(str(out_dir / "tokenizer.json"))
 
-    # Quick test
-    test_text = "ኣብዚ ቦታ ምንባር ንዓና ሰናይ ኢዩ።"
-    tokens = tokenizer.encode(test_text).tokens
-    print(f"[INFO] Sample encoding for '{test_text}': {tokens}")
-    decoded = tokenizer.decode(tokenizer.encode(test_text).ids)
-    print(f"[INFO] Decoded back: {decoded}")
+    print(f"[INFO] Tokenizer saved to: {out_dir / 'tokenizer.json'}")
+
+    # Sanity check
+    test_text = "ሰላም ኩን ኣደርካ?"
+    encoding = tokenizer.encode(test_text)
+
+    print(f"[INFO] Sample text: {test_text}")
+    print(f"[INFO] Tokens: {encoding.tokens}")
+    print(f"[INFO] Decoded: {tokenizer.decode(encoding.ids)}")
+
+    if tokenizer.decode(encoding.ids) == test_text:
+        print("[INFO] Round-trip PASSED ✅")
+    else:
+        print("[WARNING] Round-trip FAILED ❌")
+
 
 if __name__ == "__main__":
     train()

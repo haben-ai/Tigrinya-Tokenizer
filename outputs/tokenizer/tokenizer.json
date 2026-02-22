@@ -57,7 +57,10 @@
     "invert": false
   },
   "post_processor": null,
-  "decoder": null,
+  "decoder": {
+    "type": "BPEDecoder",
+    "suffix": "</w>"
+  },
   "model": {
     "type": "BPE",
     "dropout": null,
