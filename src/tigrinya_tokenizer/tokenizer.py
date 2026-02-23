@@ -1,3 +1,5 @@
+# src/tigrinya_tokenizer/tokenizer.py
+
 import os
 from pathlib import Path
 from tokenizers import Tokenizer
@@ -9,81 +11,85 @@ from tokenizers.decoders import BPEDecoder
 import yaml
 
 
-def load_config(path="configs/bpe_50k.yaml"):
-    with open(path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+class TigrinyaTokenizer:
+    """
+    Simple Tigrinya BPE Tokenizer.
+    Users can just call .tokenize(text) and get tokenized output.
+    Automatically trains on default corpus or loads existing tokenizer if available.
+    """
 
+    def __init__(self, tokenizer_path="outputs/tokenizer/tokenizer.json",
+                 corpus_file="data/processed/normalized.txt",
+                 config_path="configs/bpe_50k.yaml"):
+        self.tokenizer_path = tokenizer_path
+        self.corpus_file = corpus_file
+        self.config_path = config_path
 
-def train():
-    cfg = load_config()
-    corpus_file = "data/processed/normalized.txt"
+        # Try loading existing tokenizer first
+        if os.path.exists(self.tokenizer_path):
+            self.tokenizer = Tokenizer.from_file(self.tokenizer_path)
+            print(f"[INFO] Loaded existing tokenizer from {self.tokenizer_path}")
+        else:
+            print("[INFO] No existing tokenizer found, will train new one.")
+            self.tokenizer = None
 
-    if not os.path.exists(corpus_file):
-        print(f"[ERROR] Corpus file not found: {corpus_file}")
-        return
+        # Load config
+        self.cfg = self.load_config(self.config_path)
 
-    if os.path.getsize(corpus_file) == 0:
-        print(f"[ERROR] Corpus file is empty: {corpus_file}")
-        return
+        # Train automatically if tokenizer not loaded
+        if self.tokenizer is None:
+            self.train()
 
-    print(f"[INFO] Training BPE tokenizer on: {corpus_file}")
-    print(f"[INFO] Target vocab size: {cfg['tokenizer']['vocab_size']}")
+    def load_config(self, path):
+        """Load tokenizer config YAML"""
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"Config file not found: {path}")
+        with open(path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f)
 
-    # Initialize tokenizer
-    tokenizer = Tokenizer(BPE(unk_token="<unk>"))
+    def train(self):
+        """Train BPE tokenizer from corpus"""
+        if not os.path.exists(self.corpus_file):
+            raise FileNotFoundError(f"Corpus file not found: {self.corpus_file}")
+        if os.path.getsize(self.corpus_file) == 0:
+            raise ValueError(f"Corpus file is empty: {self.corpus_file}")
 
-    # Unicode normalization (critical for Ge’ez script consistency)
-    tokenizer.normalizer = Sequence([NFC()])
+        print(f"[INFO] Training BPE tokenizer on: {self.corpus_file}")
+        print(f"[INFO] Target vocab size: {self.cfg['tokenizer']['vocab_size']}")
 
-    # ✅ IMPORTANT FIX:
-    # Use whitespace splitting so BPE can learn merges inside words
-    tokenizer.pre_tokenizer = Whitespace()
+        # Initialize tokenizer
+        self.tokenizer = Tokenizer(BPE(unk_token="<unk>"))
+        self.tokenizer.normalizer = Sequence([NFC()])
+        self.tokenizer.pre_tokenizer = Whitespace()
+        self.tokenizer.decoder = BPEDecoder()
 
-    # Proper BPE decoder
-    tokenizer.decoder = BPEDecoder()
+        trainer = BpeTrainer(
+            vocab_size=self.cfg["tokenizer"]["vocab_size"],
+            min_frequency=self.cfg["tokenizer"]["min_frequency"],
+            special_tokens=self.cfg["special_tokens"],
+        )
 
-    # Trainer configuration
-    trainer = BpeTrainer(
-        vocab_size=cfg["tokenizer"]["vocab_size"],
-        min_frequency=cfg["tokenizer"]["min_frequency"],
-        special_tokens=cfg["special_tokens"]
-    )
+        self.tokenizer.train(files=[self.corpus_file], trainer=trainer)
 
-    print("[INFO] Starting training...")
-    tokenizer.train(files=[corpus_file], trainer=trainer)
-    print("[INFO] Training complete!")
+        # Save tokenizer
+        Path(self.tokenizer_path).parent.mkdir(parents=True, exist_ok=True)
+        self.tokenizer.save(self.tokenizer_path)
+        print(f"[INFO] Tokenizer trained and saved to {self.tokenizer_path}")
 
-    # Save tokenizer
-    out_dir = Path("outputs/tokenizer")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    output_path = out_dir / "tokenizer.json"
-    tokenizer.save(str(output_path))
+    def tokenize(self, text):
+        """Tokenize text and return list of tokens"""
+        if self.tokenizer is None:
+            raise ValueError("Tokenizer not initialized.")
+        return self.tokenizer.encode(text).tokens
 
-    print(f"[INFO] Tokenizer saved to: {output_path}")
+    def encode(self, text):
+        """Return token IDs"""
+        if self.tokenizer is None:
+            raise ValueError("Tokenizer not initialized.")
+        return self.tokenizer.encode(text).ids
 
-    # Quick sanity check
-    test_text = "ሰላም ኩን ኣደርካ?"
-    encoding = tokenizer.encode(test_text)
-
-    print(f"\n[INFO] Sample text: {test_text}")
-    print(f"[INFO] Tokens: {encoding.tokens}")
-    print(f"[INFO] Decoded: {tokenizer.decode(encoding.ids)}")
-
-    if tokenizer.decode(encoding.ids) == test_text:
-        print("[INFO] Round-trip PASSED ✅")
-    else:
-        print("[WARNING] Round-trip FAILED ❌")
-
-    # Check if merges were learned
-    model = tokenizer.model
-    if hasattr(model, "get_merges"):
-        merges = model.get_merges()
-        print(f"[INFO] Number of learned merges: {len(merges)}")
-        if len(merges) == 0:
-            print("[WARNING] No merges learned! Increase vocab_size or check corpus.")
-    else:
-        print("[INFO] Cannot directly inspect merges (check tokenizer.json).")
-
-
-if __name__ == "__main__":
-    train()
+    def decode(self, ids):
+        """Convert token IDs back to text"""
+        if self.tokenizer is None:
+            raise ValueError("Tokenizer not initialized.")
+        return self.tokenizer.decode(ids)
