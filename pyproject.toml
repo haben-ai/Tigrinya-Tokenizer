@@ -36,3 +36,4 @@ include = ["tigrinya_tokenizer*"]
 # Include additional package data (config YAML files)
 [tool.setuptools.package-data]
 "tigrinya_tokenizer" = ["configs/*.yaml"]
+

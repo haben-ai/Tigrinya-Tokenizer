@@ -8,5 +8,7 @@ src/tigrinya_tokenizer/train_bpe.py
 src/tigrinya_tokenizer.egg-info/PKG-INFO
 src/tigrinya_tokenizer.egg-info/SOURCES.txt
 src/tigrinya_tokenizer.egg-info/dependency_links.txt
+src/tigrinya_tokenizer.egg-info/requires.txt
 src/tigrinya_tokenizer.egg-info/top_level.txt
+src/tigrinya_tokenizer/configs/bpe_50k.yaml
 test/test_tokenizer_tigrinya.py
