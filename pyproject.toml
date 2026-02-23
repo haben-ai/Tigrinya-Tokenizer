@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tigrinya-tokenizer"
-version = "0.1.1"
+version = "0.1.2"
 description = "Robust Tigrinya Byte Pair Encoding tokenizer"
 authors = [
   { name="Haben Eyasu", email="habifishe@gmail.com" }
