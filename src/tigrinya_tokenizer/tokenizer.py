@@ -1,39 +1,58 @@
-import os
 from pathlib import Path
 from tokenizers import Tokenizer
 
+
 class TigrinyaTokenizer:
     """
-    Tigrinya Byte-Pair Encoding (BPE) Tokenizer.
+    Tigrinya Tokenizer Library
 
-    Usage:
-        from tigrinya_tokenizer import TigrinyaTokenizer
-        tokenizer = TigrinyaTokenizer()
-        tokens = tokenizer.encode("ሰላም ኩን ኣደርካ?")
-        text = tokenizer.decode(tokens)
+    Provides:
+        - word_tokenize(text)
+        - char_tokenize(text)
+
     """
+
     def __init__(self):
-        # Load pre-trained tokenizer shipped in package
+        # Load pre-trained BPE tokenizer for word-level tokenization
         pkg_dir = Path(__file__).parent
         tokenizer_path = pkg_dir / "tokenizer.json"
 
         if not tokenizer_path.exists():
             raise FileNotFoundError(
                 f"Pre-trained tokenizer not found at {tokenizer_path}. "
-                "Please ensure tokenizer.json is included in the package."
+                "Ensure tokenizer.json is included in the package."
             )
 
-        self.tokenizer = Tokenizer.from_file(str(tokenizer_path))
+        self._bpe_tokenizer = Tokenizer.from_file(str(tokenizer_path))
 
-    def encode(self, text: str):
-        """Return list of tokens from input text."""
-        return self.tokenizer.encode(text).tokens
+    # ---------------------------------------
+    # WORD LEVEL TOKENIZATION (BPE based)
+    # ---------------------------------------
+    def word_tokenize(self, text: str):
+        """
+        Tokenizes text using the pre-trained BPE tokenizer.
 
-    def decode(self, tokens):
-        """Return text string from list of token IDs or token strings."""
-        if all(isinstance(t, int) for t in tokens):
-            return self.tokenizer.decode(tokens)
-        else:
-            # convert token strings to ids first
-            ids = [self.tokenizer.token_to_id(t) for t in tokens]
-            return self.tokenizer.decode(ids)
+        Returns:
+            List[str] — subword tokens
+        """
+        if not isinstance(text, str):
+            raise TypeError("Input must be a string.")
+
+        encoding = self._bpe_tokenizer.encode(text)
+        return encoding.tokens
+
+    # ---------------------------------------
+    # CHARACTER LEVEL TOKENIZATION
+    # ---------------------------------------
+    def char_tokenize(self, text: str):
+        """
+        Tokenizes text at character level.
+
+        Returns:
+            List[str] — individual characters
+        """
+        if not isinstance(text, str):
+            raise TypeError("Input must be a string.")
+
+        # Preserve spaces as tokens
+        return list(text)
