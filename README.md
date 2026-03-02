@@ -2,6 +2,7 @@
 
 A Byte Pair Encoding (BPE) tokenizer for the Tigrinya language, designed for low-resource NLP research and machine learning pipelines.
 
+![](https://github.com/haben-ai/Tigrinya-Tokenizer/blob/main/tig.png)
 Tigrinya is a low-resource Semitic language, and most existing tokenizers are optimized for high-resource languages. This project aims to reduce token fragmentation, lower out-of-vocabulary (OOV) rates, and better capture Tigrinya morphology.
 
 ---
