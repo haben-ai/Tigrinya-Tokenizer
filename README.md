@@ -44,6 +44,7 @@ Tigriyna_BPE_Tokenizer/
 ├── requirements.txt
 ├── .gitignore
 └── README.md
+
 ```
 from tokenizers import Tokenizer
 
@@ -56,3 +57,4 @@ encoding = tokenizer.encode(text)
 
 print("Tokens:", encoding.tokens)
 # Output Example: ['ሰላም', 'ከመይ', 'ሓዲርካ'] 
+    ```
