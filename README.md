@@ -45,7 +45,7 @@ Tigriyna_BPE_Tokenizer/
 ├── .gitignore
 └── README.md
 
-```
+```text
 from tokenizers import Tokenizer
 
 #Load the trained model
