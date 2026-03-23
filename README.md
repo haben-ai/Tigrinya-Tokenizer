@@ -46,7 +46,7 @@ Tigriyna_BPE_Tokenizer/
 └── README.md
 
 
-```python
+```
 from tokenizer.tokenizer import TigrinyaTokenizer
 
 # Initialize tokenizer
@@ -55,20 +55,19 @@ tokenizer = TigrinyaTokenizer()
 # Sample Tigrinya text
 text = "ሰላም ኩን ኣደርካ?"
 
-print("Original Text:")
-print(text)
 
-# 1️⃣ Word Tokenization
+
+# 1️ Word Tokenization
 word_tokens = tokenizer.word_tokenize(text)
 print("\nWord Tokens:")
 print(word_tokens)
 
-# 2️⃣ Character Tokenization
+# 2️ Character Tokenization
 char_tokens = tokenizer.char_tokenize(text)
 print("\nCharacter Tokens:")
 print(char_tokens)
 
-# 3️⃣ Subword Tokenization (BPE)
+# 3 Subword Tokenization (BPE)
 subword_tokens = tokenizer.subword_tokenize(text)
 print("\nSubword Tokens (BPE):")
 print(subword_tokens)
