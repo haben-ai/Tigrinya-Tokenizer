@@ -27,9 +27,8 @@ class TigrinyaTokenizer:
 
         self._bpe_tokenizer = Tokenizer.from_file(str(tokenizer_path))
 
-    # --------------------------------------------------
-    # 1️⃣ Word Tokenization (Whitespace-Based)
-    # --------------------------------------------------
+    
+    # 1 Word Tokenization (Whitespace-Based)
     def word_tokenize(self, text: str):
         """
         Splits text by whitespace.
@@ -42,9 +41,7 @@ class TigrinyaTokenizer:
 
         return text.split()
 
-    # --------------------------------------------------
     # 2️⃣ Character Tokenization
-    # --------------------------------------------------
     def char_tokenize(self, text: str):
         """
         Splits text into individual characters.
@@ -57,9 +54,7 @@ class TigrinyaTokenizer:
 
         return list(text)
 
-    # --------------------------------------------------
     # 3️⃣ Subword Tokenization (BPE-Based)
-    # --------------------------------------------------
     def subword_tokenize(self, text: str):
         """
         Tokenizes text using the trained BPE tokenizer.

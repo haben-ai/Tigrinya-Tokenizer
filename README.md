@@ -45,16 +45,33 @@ Tigriyna_BPE_Tokenizer/
 ├── .gitignore
 └── README.md
 
-```text
-from tokenizers import Tokenizer
 
-#Load the trained model
-tokenizer = Tokenizer.from_file("word_tokenizer.json")
+```python
+from tokenizer.tokenizer import TigrinyaTokenizer
 
-#Test encoding
-text = "ሰላም ከመይ ሓዲርካ?"
-encoding = tokenizer.encode(text)
+# Initialize tokenizer
+tokenizer = TigrinyaTokenizer()
 
-print("Tokens:", encoding.tokens)
-#Output Example: ['ሰላም', 'ከመይ', 'ሓዲርካ'] 
-    ```
+# Sample Tigrinya text
+text = "ሰላም ኩን ኣደርካ?"
+
+print("Original Text:")
+print(text)
+
+# 1️⃣ Word Tokenization
+word_tokens = tokenizer.word_tokenize(text)
+print("\nWord Tokens:")
+print(word_tokens)
+
+# 2️⃣ Character Tokenization
+char_tokens = tokenizer.char_tokenize(text)
+print("\nCharacter Tokens:")
+print(char_tokens)
+
+# 3️⃣ Subword Tokenization (BPE)
+subword_tokens = tokenizer.subword_tokenize(text)
+print("\nSubword Tokens (BPE):")
+print(subword_tokens)
+```
+ 
+    
