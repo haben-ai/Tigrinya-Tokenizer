@@ -48,13 +48,13 @@ Tigriyna_BPE_Tokenizer/
 ```
 from tokenizers import Tokenizer
 
-# Load the trained model
+#Load the trained model
 tokenizer = Tokenizer.from_file("word_tokenizer.json")
 
-# Test encoding
+#Test encoding
 text = "ሰላም ከመይ ሓዲርካ?"
 encoding = tokenizer.encode(text)
 
 print("Tokens:", encoding.tokens)
-# Output Example: ['ሰላም', 'ከመይ', 'ሓዲርካ'] 
+#Output Example: ['ሰላም', 'ከመይ', 'ሓዲርካ'] 
     ```
